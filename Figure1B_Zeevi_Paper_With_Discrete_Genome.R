@@ -4,24 +4,27 @@ if (!requireNamespace("BiocManager", quietly = TRUE))
 BiocManager::install()
 BiocManager::install(c("seqinr","Rsamtools"))
 install.packages("random")
-library("random")
-install.packages("tidyverse")
-library("tidyverse")
-install.packages("dplyr")
-library("dplyr")
 install.packages("reshape2")
-library("reshape2")
+install.packages("tidyverse")
+install.packages("dplyr")
 install.packages("qqman")
-library("qqman")
 install.packages("lattice")
+install.packages("tictoc")
+install.packages("mgcv")
+library("seqinr", "Rsamtools")
+library("random")
+library("tidyverse")
+library("dplyr")
+library("reshape2")
+library("qqman")
 library("lattice")
 library("ggplot2")
-install.packages("tictoc")
 library("tictoc")
+library("mgcv")
 
 #######################################################################################################################
 # read and reshape the bam file
-bam_file <- scanBam("/Users/jerrypan/Desktop/GRIPS/Analysis/20190725-bowtie2/GCF_000759815.1_ASM75981v1_genomic.bam", param = ScanBamParam(what=scanBamWhat()))
+bam_file <- scanBam("/Users/jerrypan/Desktop/GRIPS/Analysis/20190725-bowtie2/GCF_000027085.1_ASM2708v1_genomic.bam", param = ScanBamParam(what=scanBamWhat()))
 filtered_file <- data.frame(bam_file[[1]]$rname,bam_file[[1]]$pos)
 filtered_bam <- na.omit(filtered_file)
 bam_rname <- filtered_bam$bam_file.rname
@@ -99,27 +102,26 @@ column_num <- sum(max_pos)
 # result = matrix(nrow = sum(max_pos), ncol = 3)
 # result is the final format of the matrix for xyplot
 result = matrix(nrow = 0, ncol = 3)
-tic("total time")
+# tic("total time")
 for (i in 1:length(max_pos)){
-  tic(paste("For loop",i))
+  # tic(paste("For loop",i))
   index_temp_reads_pos <- which(sorted_bam_file$bam_file..1...rname == sorted_bam_file$bam_file..1...rname[i])
   temp_reads_pos <- sorted_bam_file$bam_file..1...pos[index_temp_reads_pos]
-  if (max_pos[i]-window_size+1 > 0){
-    temp <- matrix(nrow = max_pos[i]-window_size+1, ncol = 3)
+  if (max_pos[i] - window_size + 1 > 0){
+    temp <- matrix(nrow = max_pos[i] - window_size + 1, ncol = 3)
     temp[,1] <- uni_group[i]
-    temp[,2] <- (1:(max_pos[i]-window_size+1))
-    #for (j in seq(1,(max_pos[i]-window_size+1),sliding_size)){                          # Slide_size
-    for (j in seq(1,(max_pos[i]-window_size+1),sliding_size)){                           # Without Sliding_size
-      temp[j,3] <- sum(between(sorted_bam_file$bam_file..1...pos,j,j+window_size))
+    temp[,2] <- (1:(max_pos[i] - window_size + 1))
+    for (j in seq(1,(max_pos[i] - window_size + 1),sliding_size)){                           # Without Sliding_size
+      temp[j,3] <- sum(between(sorted_bam_file$bam_file..1...pos,j,j + window_size))
     }
   }
   else{
     next
   }
   result <- rbind(result,temp)
-  toc()
+  # toc()
 }
-toc()
+# toc()
 result <- na.omit(result)
 result
 #######################################################################################################################
@@ -147,13 +149,16 @@ colnames(result.df)[3] <- "Reads"
 RNAME <- uni_rname[result.df$RNAME]
 Position <- result.df$Position
 Reads <- result.df$Reads
-sum(reads_result)
 
 xyplot(Reads ~ Position | RNAME, data = result.df, pch = ".", main = "Genomic Mapping for GCF_000027085.1_ASM2708v1")
 
-p1 <- ggplot(result.df, aes(x = Position, y = Reads), pch = ".") +
-  facet_grid(~ RNAME) + 
-  ggtitle("Genomic Mapping for GCF_000027085.1_ASM2708v1") +
-  geom_point(shape = 19, color = "blue", size = 0.01)
-p1 
+# p1 <- ggplot(result.df, aes(x = Position, y = Reads), pch = ".") +
+#   facet_grid(~ RNAME, space = "free_x", scales = "free_x") + 
+#   ggtitle("Genomic Mapping for GCF_000027085.1_ASM2708v1") +
+#   geom_point(shape = 19, color = "blue", size = 0.01)
+# ggsave("~/Desktop/test.png", p1, width = 12, height = 3)
 #######################################################################################################################
+
+
+#######################################################################################################################
+
