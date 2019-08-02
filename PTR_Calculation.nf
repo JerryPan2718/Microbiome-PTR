@@ -17,9 +17,12 @@ ref2_file = file(params.ref2_file)
 // params.bam_file = "/Users/jerrypan/Desktop/GRIPS/Analysis/20190731-bowtie2/test1.bam"
 // bam_file = file(params.bam_file)
 
-window_size = 10000
-sliding_size = 100
+params.window_size = 10000
+params.sliding_size = 100
 output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.jpg"
+
+window_size = params.window_size
+sliding_size = params.sliding_size
 
 params.build_icm = "/Users/jerrypan/Desktop/GRIPS/Glimmer/bin/build-icm"
 params.glimmer3 = "/Users/jerrypan/Desktop/GRIPS/Glimmer/bin/glimmer3"
@@ -134,8 +137,5 @@ process calculation_and_graph_ {
 
     """
 }
-
-
-
 
 
