@@ -36,7 +36,7 @@ process_arguments <- function(){
   p <- add_argument(p, "--output",
                     help = paste("This is the output"),
                     type = "character",
-                    default = "Coverage_Graph.jpg", "PTR.txt")
+                    default = "Coverage_Graph.jpg")
   
   
   # Read arguments
@@ -129,7 +129,7 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
   
   # Output
   write.table(PTR, file = "/Users/jerrypan/Desktop/PTR.txt")
-  jpeg(file = "/Users/jerrypan/Desktop/Coverage_Graph.jpg")
+  jpeg(file = output)
   plot(y ~ x, pch = ".")
   lines(l$fitted ~ x, col = "red")
   abline(h = Peak, v = x_peak, col="blue")
