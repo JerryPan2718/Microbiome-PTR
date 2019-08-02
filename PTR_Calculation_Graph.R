@@ -1,5 +1,7 @@
 #!/usr/bin/env Rscript
 # install.packages("argparser")
+
+tictoc::tic("Total Time")
 library("argparser")
 library("Rsamtools")
 library("random")
@@ -51,8 +53,6 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
   bam_file <- scanBam(root_path, param = ScanBamParam(what=scanBamWhat()))
   filtered_file <- data.frame(bam_file[[1]]$rname,bam_file[[1]]$pos)
   filtered_bam <- na.omit(filtered_file)
-  # bam_rname <- filtered_bam$bam_file.rname
-  # bam_pos <- filtered_bam$bam_file.pos
   sorted_bam_file <- filtered_bam[order(filtered_bam$bam_file..1...rname),]
   
   # Set variables
@@ -71,12 +71,11 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
     max_pos[i] = max(sorted_bam_file$bam_file..1...pos[match_rname])
   }
   column_num <- sum(max_pos)
-  # result = matrix(nrow = sum(max_pos), ncol = 3)
+  
   # result is the final format of the matrix for xyplot
   result = matrix(nrow = 0, ncol = 3)
-  # tic("total time")
+  
   for (i in 1:length(max_pos)){
-    # tic(paste("For loop",i))
     index_temp_reads_pos <- which(sorted_bam_file$bam_file..1...rname == sorted_bam_file$bam_file..1...rname[i])
     temp_reads_pos <- sorted_bam_file$bam_file..1...pos[index_temp_reads_pos]
     if (max_pos[i] - window_size + 1 > 0){
@@ -91,9 +90,7 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
       next
     }
     result <- rbind(result,temp)
-    # toc()
   }
-  # toc()
   result <- na.omit(result)
   
   test <- data.frame(result[,2:3])
@@ -118,32 +115,28 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
   extrema <- na.omit(extrema)
   Peak <- max(as.vector(extrema[,2]))
   Trough <- min(as.vector(extrema[,2]))
-  PTR <- Peak / Trough 
+  PTR <- Peak / Trough
   
   
   # Highlight the peak and trough
-  x_peak <- extrema[which(as.vector(extrema[,2]) == Peak),1]
-  x_trough <- extrema[which(as.vector(extrema[,2]) == Trough),1]
-  
+  x_peak <- extrema[which(as.vector(extrema[,2]) == Peak), 1]
+  x_trough <- extrema[which(as.vector(extrema[,2]) == Trough), 1]
   
   
   # Output
-  write.table(PTR, file = "/Users/jerrypan/Desktop/PTR.txt")
+  write.table(PTR, file = "/Users/jerrypan/Desktop/PTR1.txt")
   jpeg(file = output)
   plot(y ~ x, pch = ".")
   lines(l$fitted ~ x, col = "red")
-  abline(h = Peak, v = x_peak, col="blue")
-  abline(h = Trough, v = x_trough, col="blue")
+  abline(h = Peak, v = x_peak, col = "blue")
+  abline(h = Trough, v = x_trough, col = "blue")
   dev.off()
 }
 
-
-# ## Test the function
-# tictoc::tic("function")
-# bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Analysis/20190725-bowtie2/GCF_000027085.1_ASM2708v1_genomic.bam", 10000, 100)
-# tictoc::toc()
-
-
 args <- process_arguments()
-
 bam_into_PTR_and_graph(args$input, args$window_size, args$sliding_size, args$output)
+toc()
+
+# Test the function with default input
+bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/work/a8/eb222ddad29da04eaf8d1219dceb1b/bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads1.jpg")
+bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Analysis/20190802-overall/GCF_000027085.1_ASM2708v1.bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads2.jpg")
