@@ -1,32 +1,30 @@
 #!/usr/bin/env nextflow
-import java.text.SimpleDateFormat
 
 params.genome = "/Users/jerrypan/Desktop/GRIPS/Data/GCF_000027085.1_ASM2708v1_genomic.fna"
 genome_file = file(params.genome)
-// params.ref1_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_T0_r1_1.fastq"
-// ref1_file = file(params.ref1_file)
-// params.ref2_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_T0_r1_2.fastq"
-// ref2_file = file(params.ref2_file
-
+params.ref1_file = "/Users/jerrypan/Desktop/GRIPS/Data/ERR930224_1.fastq"
+ref1_file = file(params.ref1_file)
+params.ref2_file = "/Users/jerrypan/Desktop/GRIPS/Data/ERR930224_2.fastq"
+ref2_file = file(params.ref2_file)
 // params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_T0_r1_1.fastq"
-params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/ERR969371.fastq"
+params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/Vcit_A4_3.fastq"
 ref_file = file(params.ref_file)
-params.ref1_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1*").buffer(size:2)
-params.ref2_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_2*").buffer(size:2)
-params.value = Channel.from(1,2)
-// params.name_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1_*"
-// name_file = file(params.name_file)
+// params.test1 = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/Ery_T0_r1_1").buffer(size:2)
+// params.test2 = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/Ery_T0_r1_2").buffer(size:2)
+
 
 // params.cr_genome = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/CR_Test/*.fastq").buffer(size:3)
-
+ 
 
 
 params.window_size = 10000
 params.step_size = 100
 params.single_file = false
+// true: error
+// false: works fine
 
 
-// output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.jpg"
+output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.jpg"
 
 window_size = params.window_size
 step_size = params.step_size
@@ -39,13 +37,10 @@ params.bowtie2 = "/Users/jerrypan/Desktop/GRIPS/Bowtie2_Binary/bowtie2"
 params.r_algo = "/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/PTR_Calculation_Graph.R"
 params.samtools = "/Users/jerrypan/Desktop/GRIPS/Samtools_1.9/samtools"
 
-
-
-
 process glimmer_build_icm_ {
 
-    input:
-    file "genome" from genome_file  
+	input:
+	file "genome" from genome_file  
 
 
     output:
@@ -53,7 +48,7 @@ process glimmer_build_icm_ {
 
     script:
     """
-    $params.build_icm icm < $genome
+ 	$params.build_icm icm < $genome
 
     """
 }
@@ -61,24 +56,46 @@ process glimmer_build_icm_ {
 
 process glimmer3_ {
 
-    input:
-    file "genome" from genome_file
-    file "icm" from icm_file
+	input:
+	file "genome" from genome_file
+	file "icm" from icm_file
+
+	output:
+	file 'predict' into predict_file
+
+	script:
+	"""
+	$params.glimmer3 $genome $icm predict > predict
+
+	"""
+}
+
+process sickle_pe_ {
+
+	input:
+	file "ref1" from ref1_file
+	file "ref2" from ref2_file
 
     output:
-    file 'predict' into predict_file
+    //file 'trimmed*' into trimmed_file
+    file trimmed1 into trimmed_file1
+    file trimmed2 into trimmed_file2
+    file trimmedS into trimmed_file3
+
+    when:
+    !params.single_file
 
     script:
     """
-    $params.glimmer3 $genome $icm predict > predict
+    $params.sickle pe -f $ref1 -r $ref2 -t sanger -o trimmed1 -p trimmed2 -s trimmedS
 
     """
 }
 
 process bowtie2_build_ {
 
-    input:
-    file "genome" from genome_file
+	input:
+	file "genome" from genome_file
 
     output:
     file 'index' into index_file
@@ -86,68 +103,35 @@ process bowtie2_build_ {
 
     script:
     """
-    $params.bowtie2_build $genome index > index
-    
-    """
-}
-
-process sickle_pe_ {
-
-    input:
-    file "ref1" from params.ref1_file
-    file "ref2" from params.ref2_file
-    // file "name" from name_file
-    val "it" from params.value
-    
-    output:
-    //file 'trimmed*' into trimmed_file
-    file 'trimmed1*' into trimmed_file1
-    file 'trimmed2*' into trimmed_file2
-    file 'trimmedS*' into trimmed_file3
-
-
-    when:
-    !params.single_file
-
-    // params.temp = call()
-    script:
-    """
-    $params.sickle pe -f $ref1 -r $ref2 -t sanger -o trimmed1$name -p trimmed2$name -s trimmedS$it
+	$params.bowtie2_build $genome index > index
+	
     """
 }
 
 process bowtie2_pe_ {
 
-    input:
-    file "trimmed1" from trimmed_file1
+	input:
+	file "trimmed1" from trimmed_file1
     file "trimmed2" from trimmed_file2
     val "index" from index_file
-    // file "name" from name_file
-    val "it" from params.value
-
 
     output:
-    file 'bam*' into bam_file_pe
+    file 'bam' into bam_file_pe
 
     when:
     !params.single_file
 
     script:
     """
-
-    $params.bowtie2 -x $index -1 $trimmed1 -2 $trimmed2 | $params.samtools view -b > bam$it
+    $params.bowtie2 -x $index -1 $trimmed1 -2 $trimmed2 | $params.samtools view -b - > bam
 
     """
 }
 
 process calculation_and_graph_pe_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190805-nextflow', mode: 'copy'
+
     input:
     file "bam" from bam_file_pe
-    // file "name" from name_file
-    val "it" from params.value
-    // file "name1" from params.ref1_file
-    // file "name2" from params.ref2_file
     // val "window_size" from window_size
     // val "step_size" from step_size
     // val "output" from output
@@ -161,7 +145,7 @@ process calculation_and_graph_pe_ {
 
     script:
     """
-    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $it
+    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $output 
 
     """
 }
@@ -206,7 +190,7 @@ process bowtie2_se_ {
 }
 
 process calculation_and_graph_se_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190805-nextflow', mode: 'copy'
+
     input:
     file "bam" from bam_file_se
 
