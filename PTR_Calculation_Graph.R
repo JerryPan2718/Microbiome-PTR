@@ -29,8 +29,8 @@ process_arguments <- function(){
                     default = 10000)
   
   # Optional arguments
-  p <- add_argument(p, "--sliding_size",
-                    help = paste("This is the sliding_size"),
+  p <- add_argument(p, "--step_size",
+                    help = paste("This is the step_size"),
                     type = "Integer",
                     default = 100)
   
@@ -57,7 +57,7 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
   
   # Set variables
   window_size <- w_size
-  sliding_size <- s_size
+  step_size <- s_size
   
   # group with unique variables
   group <- sorted_bam_file$bam_file..1...rname
@@ -82,7 +82,7 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
       temp <- matrix(nrow = max_pos[i] - window_size + 1, ncol = 3)
       temp[,1] <- uni_group[i]
       temp[,2] <- (1:(max_pos[i] - window_size + 1))
-      for (j in seq(1,(max_pos[i] - window_size + 1),sliding_size)){                           
+      for (j in seq(1,(max_pos[i] - window_size + 1),step_size)){                           
         temp[j,3] <- sum(between(sorted_bam_file$bam_file..1...pos,j,j + window_size))
       }
     }
@@ -124,19 +124,19 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000, s_size = 100, outp
   
   
   # Output
-  write.table(PTR, file = "/Users/jerrypan/Desktop/PTR1.txt")
-  jpeg(file = output)
+  write.table(PTR, file = paste("/Users/jerrypan/Desktop/", basename(root_path),"PTR.txt"))
+  tiff(file = paste("/Users/jerrypan/Desktop/", basename(root_path),"Graph.tiff"))
   plot(y ~ x, pch = ".")
-  lines(l$fitted ~ x, col = "red")
+  lines(l$fitted[1000:length(l$fitted)-1000] ~ x[1000:length(l$fitted)-1000], col = "red")
   abline(h = Peak, v = x_peak, col = "blue")
   abline(h = Trough, v = x_trough, col = "blue")
   dev.off()
 }
 
 args <- process_arguments()
-bam_into_PTR_and_graph(args$input, args$window_size, args$sliding_size, args$output)
+bam_into_PTR_and_graph(args$input, args$window_size, args$step_size, args$output)
 toc()
 
 # Test the function with default input
-bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/work/a8/eb222ddad29da04eaf8d1219dceb1b/bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads1.jpg")
-bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Analysis/20190802-overall/GCF_000027085.1_ASM2708v1.bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads2.jpg")
+#bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/work/a8/eb222ddad29da04eaf8d1219dceb1b/bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads1.jpg")
+#bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Analysis/20190802-overall/GCF_000027085.1_ASM2708v1.bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads2.jpg")
