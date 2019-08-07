@@ -9,8 +9,8 @@ genome_file = file(params.genome)
 // ref2_file = file(params.ref2_file
 
 // params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_T0_r1_1.fastq"
-params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/ERR969371.fastq"
-ref_file = file(params.ref_file)
+// params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/ERR969371.fastq"
+// ref_file = file(params.ref_file)
 
 params.size = 2
 params.indir1 = '/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test1/'
