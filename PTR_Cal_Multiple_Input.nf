@@ -11,9 +11,26 @@ genome_file = file(params.genome)
 // params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_T0_r1_1.fastq"
 params.ref_file = "/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/ERR969371.fastq"
 ref_file = file(params.ref_file)
-params.ref1_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1*").buffer(size:2)
-params.ref2_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_2*").buffer(size:2)
-params.value = Channel.from(1,2)
+
+params.size = 2
+params.indir1 = '/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test1/'
+params.indir2 = '/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test2/'
+params.indir = '/Users/jerrypan/Desktop/GRIPS/Data/CR_Test/'
+
+// params.ref1_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1*").buffer(size:params.size)
+// params.ref2_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_2*").buffer(size:params.size)
+// params.names = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Test_Index/*").buffer(size:params.size)
+
+TEMP1 = Channel.fromPath("${params.indir1}/*.fastq")
+TEMP2 = Channel.fromPath("${params.indir2}/*.fastq")
+
+TEMP1.into{ READS1; NAMES1 }
+TEMP2.into{ READS2; NAMES2 }
+
+TEMP = Channel.fromPath("${params.indir}/*.fastq")
+TEMP.into{ READS; NAMES}
+
+// params.value = Channel.from(1,2)
 // params.name_file = "/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1_*"
 // name_file = file(params.name_file)
 
@@ -23,10 +40,8 @@ params.value = Channel.from(1,2)
 
 params.window_size = 10000
 params.step_size = 100
-params.single_file = false
-
-
-// output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.jpg"
+params.single_file = true
+params.output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.tiff"
 
 window_size = params.window_size
 step_size = params.step_size
@@ -40,7 +55,19 @@ params.r_algo = "/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/PTR_Calculatio
 params.samtools = "/Users/jerrypan/Desktop/GRIPS/Samtools_1.9/samtools"
 
 
+// process name_extract_ {
 
+//     input:
+//     file "name_files" from params.names
+
+//     output:
+//     file 'basename*' into basename_file
+
+//     script:
+//     """
+//     String basename = new File('/Users/jerrypan/Desktop/GRIPS/Data/Test_Index/*').text
+//     """
+// }
 
 process glimmer_build_icm_ {
 
@@ -83,7 +110,6 @@ process bowtie2_build_ {
     output:
     file 'index' into index_file
 
-
     script:
     """
     $params.bowtie2_build $genome index > index
@@ -94,10 +120,9 @@ process bowtie2_build_ {
 process sickle_pe_ {
 
     input:
-    file "ref1" from params.ref1_file
-    file "ref2" from params.ref2_file
-    // file "name" from name_file
-    val "it" from params.value
+    file "ref1" from READS1
+    file "ref2" from READS2
+    // file "basename" from basename_file
     
     output:
     //file 'trimmed*' into trimmed_file
@@ -112,7 +137,7 @@ process sickle_pe_ {
     // params.temp = call()
     script:
     """
-    $params.sickle pe -f $ref1 -r $ref2 -t sanger -o trimmed1$name -p trimmed2$name -s trimmedS$it
+    $params.sickle pe -f ref1 -r ref2 -t sanger -o trimmed1 -p trimmed2 -s trimmedS
     """
 }
 
@@ -122,8 +147,7 @@ process bowtie2_pe_ {
     file "trimmed1" from trimmed_file1
     file "trimmed2" from trimmed_file2
     val "index" from index_file
-    // file "name" from name_file
-    val "it" from params.value
+    // file "basename" from basename_file
 
 
     output:
@@ -135,33 +159,27 @@ process bowtie2_pe_ {
     script:
     """
 
-    $params.bowtie2 -x $index -1 $trimmed1 -2 $trimmed2 | $params.samtools view -b > bam$it
+    $params.bowtie2 -x $index -1 $trimmed1 -2 $trimmed2 | $params.samtools view -b > bam
 
     """
 }
 
 process calculation_and_graph_pe_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190805-nextflow', mode: 'copy'
+    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190806-overall', mode: 'copy'
+
     input:
     file "bam" from bam_file_pe
-    // file "name" from name_file
-    val "it" from params.value
-    // file "name1" from params.ref1_file
-    // file "name2" from params.ref2_file
-    // val "window_size" from window_size
-    // val "step_size" from step_size
-    // val "output" from output
+    file "input1" from NAMES1
+    file "output" from params.output
 
     output:
-    // file 'graph' into output1
-    // file 'text' into output2
 
     when:
     !params.single_file
 
     script:
     """
-    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $it
+    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $output --name $input1 
 
     """
 }
@@ -169,11 +187,11 @@ process calculation_and_graph_pe_ {
 process sickle_se_ {
 
     input:
-    file "ref" from ref_file
+    file "ref" from READS
 
     output:
     //file 'trimmed*' into trimmed_file
-    file 'trimmed' into trimmed_file
+    file 'trimmed*' into trimmed_file
     
 
     when:
@@ -193,34 +211,34 @@ process bowtie2_se_ {
     val "index" from index_file
 
     output:
-    file 'bam' into bam_file_se
+    file 'bam*' into bam_file_se
     
     when:
     params.single_file
 
     script:
     """
-    $params.bowtie2 -x $index -1 $trimmed | $params.samtools view -b > bam
+    $params.bowtie2 -x $index -U $trimmed | $params.samtools view -b > bam
 
     """
 }
 
 process calculation_and_graph_se_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190805-nextflow', mode: 'copy'
+    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190806-overall', mode: 'copy'
+
     input:
     file "bam" from bam_file_se
-
+    file input1 from NAMES
+    file "output" from params.output
 
     output:
-    // file 'graph' into output1
-    // file 'text' into output2
 
     when:
     params.single_file
 
     script:
     """
-    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $output 
+    $params.r_algo $bam --window_size $window_size --step_size $step_size --output $output --name $input1 
 
     """
 }
