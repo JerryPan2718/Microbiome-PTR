@@ -41,7 +41,7 @@ TEMP.into{ READS; NAMES}
 params.window_size = 10000
 params.step_size = 100
 params.single_file = true
-params.output = "/Users/jerrypan/Desktop/Coverage_Reads_Graph.tiff"
+params.output = "/Users/jerrypan/Desktop/GRIPS/Analysis/20190807-overall"
 
 window_size = params.window_size
 step_size = params.step_size
@@ -224,7 +224,7 @@ process bowtie2_se_ {
 }
 
 process calculation_and_graph_se_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190806-overall', mode: 'copy'
+    publishDir 'params.output/', mode: 'copy'
 
     input:
     file "bam" from bam_file_se

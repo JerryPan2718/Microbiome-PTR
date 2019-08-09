@@ -1,5 +1,4 @@
 #!/usr/bin/env Rscript
-# install.packages("argparser")
 
 library("argparser")
 library("Rsamtools")
@@ -137,10 +136,10 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000,
   # str(bam_file)
   qname <- bam_file[[1]]$qname[1]
   qname <- sub(pattern = "[.][0-9]+$", replacement = "", x = qname)
-  filename <- paste0(output, qname, ".txt")
+  filename <- paste0(qname, ".txt")
   write.table(PTR, file = filename)
   # write.table(PTR, file = paste("/Users/jerrypan/Desktop/", basename(root_path),"PTR.txt"))
-  tiff(file = paste(output, qname, "_", "Graph.tiff"))
+  tiff(file = paste0(qname, "_", "Graph.tiff"))
   plot(y ~ x, pch = ".")
   lines(l$fitted[10000:length(l$fitted)-10000] ~ x[10000:length(l$fitted)-10000], col = "red")
   abline(h = Peak, v = x_peak, col = "blue")
