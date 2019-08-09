@@ -40,8 +40,8 @@ TEMP.into{ READS; NAMES}
 
 params.window_size = 10000
 params.step_size = 100
-params.single_file = true
-params.output = "/Users/jerrypan/Desktop/GRIPS/Analysis/20190807-overall"
+params.single_file = false
+params.output = "/Users/jerrypan/Desktop/GRIPS/Analysis/20190809-overall"
 
 window_size = params.window_size
 step_size = params.step_size
@@ -53,6 +53,7 @@ params.bowtie2_build = "/Users/jerrypan/Desktop/GRIPS/Bowtie2_Binary/bowtie2-bui
 params.bowtie2 = "/Users/jerrypan/Desktop/GRIPS/Bowtie2_Binary/bowtie2"
 params.r_algo = "/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/PTR_Calculation_Graph.R"
 params.samtools = "/Users/jerrypan/Desktop/GRIPS/Samtools_1.9/samtools"
+
 
 
 // process name_extract_ {
@@ -165,7 +166,7 @@ process bowtie2_pe_ {
 }
 
 process calculation_and_graph_pe_ {
-    publishDir '/Users/jerrypan/Desktop/GRIPS/Analysis/20190806-overall', mode: 'copy'
+    publishDir 'params.output/', mode: 'copy'
 
     input:
     file "bam" from bam_file_pe
