@@ -40,7 +40,7 @@ TEMP.into{ READS; NAMES}
 
 params.window_size = 10000
 params.step_size = 100
-params.single_file = false
+params.single_file = true
 params.output = "/Users/jerrypan/Desktop/GRIPS/Analysis/20190809-overall"
 
 window_size = params.window_size
@@ -166,7 +166,7 @@ process bowtie2_pe_ {
 }
 
 process calculation_and_graph_pe_ {
-    publishDir 'params.output/', mode: 'copy'
+    publishDir "$params.output", mode: 'copy'
 
     input:
     file "bam" from bam_file_pe
@@ -225,7 +225,8 @@ process bowtie2_se_ {
 }
 
 process calculation_and_graph_se_ {
-    publishDir 'params.output/', mode: 'copy'
+    publishDir "$params.output", mode: 'copy'
+    maxForks 10
 
     input:
     file "bam" from bam_file_se
