@@ -137,7 +137,3 @@ bam_into_PTR_and_graph_multiple_input <- function(root_path, w_size = 10000, s_s
 args <- process_arguments()
 bam_into_PTR_and_graph_multiple_input(args$input, args$window_size, args$step_size, args$output)
 toc()
-
-# Test the function with default input
-#bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/work/a8/eb222ddad29da04eaf8d1219dceb1b/bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads1.jpg")
-#bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Analysis/20190802-overall/GCF_000027085.1_ASM2708v1.bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads2.jpg")

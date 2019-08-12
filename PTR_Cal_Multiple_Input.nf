@@ -15,7 +15,7 @@ genome_file = file(params.genome)
 params.size = 2
 params.indir1 = '/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test1/'
 params.indir2 = '/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test2/'
-params.indir = '/Users/jerrypan/Desktop/GRIPS/Data/CR_Test/'
+params.indir = '/Users/jerrypan/Desktop/GRIPS/Data/Citrobacter_Rodentium/'
 
 // params.ref1_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_1*").buffer(size:params.size)
 // params.ref2_file = Channel.fromPath("/Users/jerrypan/Desktop/GRIPS/Data/Ery_Test/ERR930224_2*").buffer(size:params.size)

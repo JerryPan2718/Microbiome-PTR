@@ -52,7 +52,7 @@ process_arguments <- function(){
 
 bam_into_PTR_and_graph <- function(root_path, w_size = 10000,
                                    s_size = 100,
-                                   output = "/Users/jerrypan/Desktop/Coverage_Graph.jpg",
+                                   output = "",
                                    name = ""){
   bam_file <- scanBam(root_path, param = ScanBamParam(what=scanBamWhat()))
   filtered_file <- data.frame(bam_file[[1]]$rname,bam_file[[1]]$pos)
@@ -121,24 +121,18 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000,
   Trough <- min(as.vector(extrema[,2]))
   PTR <- Peak / Trough
   
-  
   # Highlight the peak and trough
   x_peak <- extrema[which(as.vector(extrema[,2]) == Peak), 1]
   x_trough <- extrema[which(as.vector(extrema[,2]) == Trough), 1]
-  
-  
   
   # Output
   name = output
   new_name <- sub(pattern = "[.]fastq$", replacement = "", x = basename(name))
   
-  # bam_file <- scanBam("/Users/jerrypan/Desktop/test.bam", param = ScanBamParam(what=scanBamWhat()))
-  # str(bam_file)
   qname <- bam_file[[1]]$qname[1]
   qname <- sub(pattern = "[.][0-9]+$", replacement = "", x = qname)
   filename <- paste0(qname, ".txt")
   write.table(PTR, file = filename)
-  # write.table(PTR, file = paste("/Users/jerrypan/Desktop/", basename(root_path),"PTR.txt"))
   tiff(file = paste0(qname, "_", "Graph.tiff"))
   plot(y ~ x, pch = ".")
   lines(l$fitted[10000:length(l$fitted)-10000] ~ x[10000:length(l$fitted)-10000], col = "red")
@@ -149,26 +143,5 @@ bam_into_PTR_and_graph <- function(root_path, w_size = 10000,
 
 args <- process_arguments()
 bam_into_PTR_and_graph(args$input, args$window_size, args$step_size, args$output)
-
-# Test the function with default input
-# bam_into_PTR_and_graph("/Users/jerrypan/Desktop/GRIPS/Microbiota_Project/work/a8/eb222ddad29da04eaf8d1219dceb1b/bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads1.jpg")
-# bam_into_PTR_and_graph("/Users/jerrypan/Desktop/test.bam", 10000, 100, "/Users/jerrypan/Desktop/Coverage_reads2.jpg")
-
-# root_path = "/home/jerrypan/Data/Data_Citrobacter_Rodentium/"
-# output = "/home/jerrypan/Analysis/20190807-overall/"
-# name = output
-# new_name <- sub(pattern = "[.]fastq$", replacement = "", x = basename(name))
-# 
-# bam_file <- scanBam("/Users/jerrypan/Desktop/test.bam", param = ScanBamParam(what=scanBamWhat()))
-# str(bam_file)
-# qname <- bam_file[[1]]$qname[1]
-# qname <- sub(pattern = "[.][0-9]+$", replacement = "", x = qname)
-# 
-# filename <- paste0(output, qname, ".txt")
-# write.table(PTR, file = filename)
-
-# bam_into_PTR_and_graph("/Users/jerrypan/Desktop/test.bam", 10000, 100,
-#                        "/Users/jerrypan/Desktop/Coverage_reads2.jpg",
-#                        "/Users/jerry/Desktop/GRIPS/Data/ERR930224_1.fastq")
 
 
